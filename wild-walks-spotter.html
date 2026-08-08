@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wild Walks — Spotter Sheet Maker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,600&family=Work+Sans:wght@400;500;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #efe8d6;
+    --paper-2: #e6dcc4;
+    --card: #faf6ea;
+    --ink: #26311f;
+    --pine: #43593c;
+    --pine-deep: #2e3f28;
+    --rust: #a9612e;
+    --brass: #b08d3e;
+    --line: #cabf9c;
+    --shadow: rgba(38,49,31,0.18);
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    margin:0;
+    padding:0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    background-image:
+      radial-gradient(circle at 15% 8%, rgba(255,255,255,0.35), transparent 45%),
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.015) 0px, rgba(0,0,0,0.015) 1px, transparent 1px, transparent 3px);
+  }
+
+  .app{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+  }
+
+  /* ---------- Header ---------- */
+  .masthead{
+    text-align:center;
+    margin-bottom: 28px;
+  }
+  .masthead .eyebrow{
+    font-family:'Courier Prime', monospace;
+    letter-spacing:0.28em;
+    text-transform:uppercase;
+    font-size:11px;
+    color: var(--pine-deep);
+    opacity:0.75;
+    margin-bottom:6px;
+  }
+  .masthead h1{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size: clamp(34px, 5vw, 52px);
+    margin: 0 0 6px;
+    color: var(--pine-deep);
+    letter-spacing: -0.01em;
+  }
+  .masthead h1 em{
+    font-style: italic;
+    color: var(--rust);
+    font-weight:600;
+  }
+  .masthead p{
+    font-size:15px;
+    color: var(--ink);
+    opacity:0.72;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* ---------- Layout ---------- */
+  .layout{
+    display:grid;
+    grid-template-columns: 320px 1fr;
+    gap: 28px;
+    align-items:start;
+  }
+  @media (max-width: 880px){
+    .layout{ grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Control panel ---------- */
+  .panel{
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 22px 22px 24px;
+    box-shadow: 0 10px 24px -14px var(--shadow);
+    position: sticky;
+    top: 20px;
+  }
+  .panel h2{
+    font-family:'Fraunces', serif;
+    font-size: 19px;
+    margin: 0 0 16px;
+    color: var(--pine-deep);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .field{ margin-bottom: 16px; }
+  .field label{
+    display:block;
+    font-family:'Courier Prime', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--pine);
+    margin-bottom: 6px;
+  }
+  .chip-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .chip{
+    border: 1.5px solid var(--line);
+    background: #fff;
+    color: var(--ink);
+    padding: 7px 12px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-family:'Work Sans', sans-serif;
+    cursor:pointer;
+    transition: all .12s ease;
+    user-select:none;
+  }
+  .chip:hover{ border-color: var(--pine); }
+  .chip.active{
+    background: var(--pine-deep);
+    border-color: var(--pine-deep);
+    color: #fdfaf0;
+  }
+  .field select, .field input[type=text]{
+    width:100%;
+    padding: 9px 10px;
+    border-radius: 6px;
+    border: 1.5px solid var(--line);
+    background:#fff;
+    font-family:'Work Sans', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .field select:focus, .field input:focus{
+    outline: 2px solid var(--pine);
+    outline-offset: 1px;
+  }
+
+  .btn{
+    width:100%;
+    padding: 12px 14px;
+    border-radius: 7px;
+    border: none;
+    font-family:'Work Sans', sans-serif;
+    font-weight:600;
+    font-size: 14.5px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  .btn-primary{
+    background: var(--pine-deep);
+    color: #fdfaf0;
+    margin-top: 6px;
+  }
+  .btn-primary:hover{ background:#243420; }
+  .btn-secondary{
+    background: transparent;
+    color: var(--pine-deep);
+    border: 1.5px solid var(--line);
+    margin-top: 8px;
+  }
+  .btn-secondary:hover{ border-color: var(--pine); }
+  .btn-print{
+    background: var(--rust);
+    color: #fff;
+    margin-top: 8px;
+  }
+  .btn-print:hover{ background:#8f4f22; }
+
+  .pool-note{
+    font-size:12px;
+    color: var(--pine);
+    opacity:0.75;
+    margin-top:14px;
+    line-height:1.5;
+    font-family:'Courier Prime', monospace;
+  }
+
+  .toggle-row{
+    display:flex;
+    align-items:flex-start;
+    gap:8px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+  .toggle-row input{ margin-top: 3px; }
+  .toggle-row label{
+    font-size: 13px;
+    color: var(--ink);
+    line-height:1.4;
+    cursor:pointer;
+  }
+
+  /* ---------- Sheet preview area ---------- */
+  .sheet-wrap{
+    display:flex;
+    justify-content:center;
+  }
+
+  .sheet{
+    width: 210mm;
+    min-height: 296mm;
+    max-width: 100%;
+    background: var(--card);
+    border: 1px solid var(--line);
+    box-shadow: 0 18px 40px -20px var(--shadow);
+    padding: 14mm 14mm 12mm;
+    position: relative;
+    border-radius: 3px;
+  }
+  .sheet::before{
+    content:"";
+    position:absolute;
+    inset: 6mm;
+    border: 1.5px dashed var(--line);
+    pointer-events:none;
+    border-radius: 2px;
+  }
+
+  .stamp{
+    position:absolute;
+    top: 12mm;
+    right: 14mm;
+    width: 92px;
+    height: 92px;
+    border: 2.5px solid var(--rust);
+    border-radius: 50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    transform: rotate(8deg);
+    color: var(--rust);
+    font-family:'Courier Prime', monospace;
+    font-size: 10px;
+    letter-spacing:0.06em;
+    line-height:1.35;
+    text-transform: uppercase;
+    padding: 6px;
+    opacity: 0.92;
+  }
+
+  .sheet-head{
+    padding-right: 100px;
+  }
+  .sheet-head .eyebrow{
+    font-family:'Courier Prime', monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--pine);
+  }
+  .sheet-head h2{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size: 30px;
+    margin: 4px 0 2px;
+    color: var(--pine-deep);
+  }
+  .sheet-head .sub{
+    font-size: 13.5px;
+    color: var(--ink);
+    opacity:0.75;
+    font-style: italic;
+    font-family:'Fraunces', serif;
+  }
+
+  .meta-line{
+    display:flex;
+    gap: 26px;
+    margin: 16px 0 6px;
+    font-family:'Courier Prime', monospace;
+    font-size: 12px;
+    color: var(--pine-deep);
+  }
+  .meta-line span{ border-bottom: 1px solid var(--line); padding-bottom: 3px; flex:1; }
+  .meta-line .fill{ display:inline-block; min-width: 60px; }
+
+  hr.rule{
+    border:none;
+    border-top: 1.5px solid var(--pine-deep);
+    margin: 14px 0 16px;
+    opacity:0.85;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 22px;
+  }
+  .item{
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px dotted var(--line);
+  }
+  .item:nth-last-child(1), .item:nth-last-child(2){
+    border-bottom: 1px dotted var(--line);
+  }
+  .box{
+    width: 21px;
+    height: 21px;
+    border: 2px solid var(--pine-deep);
+    border-radius: 4px;
+    flex: 0 0 auto;
+    background: #fff;
+  }
+  .icon{
+    width: 30px;
+    height:30px;
+    flex: 0 0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size: 21px;
+    line-height:1;
+  }
+  .item-name{
+    font-size: 14.5px;
+    font-weight:500;
+    color: var(--ink);
+  }
+
+  .sheet-foot{
+    margin-top: 20px;
+    display:flex;
+    justify-content: space-between;
+    align-items:flex-end;
+    gap: 16px;
+  }
+  .foot-note{
+    font-family:'Fraunces', serif;
+    font-style: italic;
+    font-size: 12.5px;
+    color: var(--pine);
+    max-width: 60%;
+  }
+  .compass{
+    width: 44px; height:44px;
+    opacity: 0.55;
+  }
+
+  .empty-state{
+    font-family:'Fraunces', serif;
+    font-style: italic;
+    color: var(--pine);
+    opacity: 0.7;
+    text-align:center;
+    padding: 60px 20px;
+  }
+
+  /* ---------- Print ---------- */
+  @media print{
+    body{ background:#fff; }
+    body *{ visibility:hidden; }
+    .sheet, .sheet *{ visibility:visible; }
+    .sheet{
+      position:absolute;
+      top:0; left:0;
+      box-shadow:none;
+      border:none;
+      width:100%;
+      min-height:0;
+      padding: 8mm 10mm;
+      margin:0;
+    }
+    .sheet::before{ inset: 4mm; border-color:#999 !important; }
+    .item{ border-bottom-color:#888 !important; }
+    .meta-line span{ border-bottom-color:#888 !important; }
+    .box{ border-color:#000 !important; }
+    hr.rule{ border-top-color:#000 !important; }
+    .stamp{ border-color:#000 !important; color:#000 !important; }
+    @page{ size: A4; margin: 10mm; }
+  }
+
+  /* ---------- B&W preview mode (screen only) ---------- */
+  .sheet.bw-preview{
+    filter: grayscale(1) contrast(1.15);
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="masthead">
+    <div class="eyebrow">Field Notes for Small Explorers</div>
+    <h1>Wild Walks <em>Spotter</em></h1>
+    <p>Pick a place, a season and where in the UK you're headed — get a fresh 10-item tick list, ready to print and take out the door.</p>
+  </div>
+
+  <div class="layout">
+    <!-- CONTROL PANEL -->
+    <div class="panel no-print">
+      <h2>🧭 Build a list</h2>
+
+      <div class="field">
+        <label>Where are you walking?</label>
+        <div class="chip-row" id="typeChips"></div>
+      </div>
+
+      <div class="field">
+        <label>Time of year</label>
+        <div class="chip-row" id="seasonChips"></div>
+      </div>
+
+      <div class="field">
+        <label>Region</label>
+        <select id="regionSelect"></select>
+      </div>
+
+      <div class="field">
+        <label>Explorer's name (optional)</label>
+        <input type="text" id="kidsName" placeholder="e.g. Alfie &amp; Rosie">
+      </div>
+
+      <button class="btn btn-primary" id="generateBtn">✏️ Generate spotter list</button>
+      <button class="btn btn-secondary" id="shuffleBtn">🔀 Shuffle these 10</button>
+      <button class="btn btn-print" id="printBtn">🖨️ Print / Save as PDF</button>
+
+      <div class="toggle-row">
+        <input type="checkbox" id="bwToggle">
+        <label for="bwToggle">Printing in black &amp; white — preview it as grayscale before you print</label>
+      </div>
+
+      <div class="pool-note" id="poolNote"></div>
+    </div>
+
+    <!-- SHEET PREVIEW -->
+    <div class="sheet-wrap">
+      <div class="sheet" id="sheet">
+        <div class="empty-state">Choose your walk, then hit "Generate spotter list" —<br>your printable sheet will appear here.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------------------------------------------------------
+   DATA
+--------------------------------------------------------------- */
+const TYPES = [
+  {id:'woods', label:'Woods & Forest', icon:'🌳'},
+  {id:'beach', label:'Beach & Coast', icon:'🐚'},
+  {id:'park', label:'Park & Green Space', icon:'🌿'},
+  {id:'countryside', label:'Countryside & Farmland', icon:'🚜'},
+  {id:'river', label:'River, Lake & Canal', icon:'💧'},
+  {id:'mountain', label:'Hills & Mountains', icon:'⛰️'},
+  {id:'garden', label:'Garden & Back Yard', icon:'🪴'},
+  {id:'town', label:'Town & Urban Walk', icon:'🏘️'}
+];
+
+const SEASONS = [
+  {id:'spring', label:'Spring'},
+  {id:'summer', label:'Summer'},
+  {id:'autumn', label:'Autumn'},
+  {id:'winter', label:'Winter'}
+];
+
+const REGIONS = [
+  {id:'all', label:'Anywhere in the UK'},
+  {id:'north-wales', label:'North Wales'},
+  {id:'south-wales', label:'South Wales'},
+  {id:'north-england', label:'North England'},
+  {id:'south-england', label:'South England'},
+  {id:'scotland', label:'Scotland'}
+];
+
+// season/region 'any' means it applies everywhere / all year.
+// ITEM: { name, icon, types:[], seasons:[], regions:[] }
+const ITEMS = [
+  // ---------------- WOODS ----------------
+  {name:'Squirrel', icon:'🐿️', types:['woods','park','garden'], seasons:['any'], regions:['all']},
+  {name:'Acorn', icon:'🌰', types:['woods','park'], seasons:['autumn'], regions:['all']},
+  {name:'Fallen log with fungi', icon:'🍄', types:['woods'], seasons:['autumn','winter'], regions:['all']},
+  {name:'Woodpecker hole', icon:'🪵', types:['woods'], seasons:['any'], regions:['all']},
+  {name:'Bluebells', icon:'🔔', types:['woods'], seasons:['spring'], regions:['all']},
+  {name:'Robin', icon:'🐦', types:['woods','park','garden'], seasons:['winter','autumn'], regions:['all']},
+  {name:'Spider web with dew', icon:'🕸️', types:['woods','park','countryside'], seasons:['autumn'], regions:['all']},
+  {name:'Pinecone', icon:'🌲', types:['woods','mountain'], seasons:['any'], regions:['all']},
+  {name:'Deer or deer tracks', icon:'🦌', types:['woods','countryside','mountain'], seasons:['any'], regions:['all']},
+  {name:'Moss-covered rock', icon:'🪨', types:['woods','mountain','river'], seasons:['any'], regions:['all']},
+  {name:'Fox or fox print', icon:'🦊', types:['woods','countryside','park'], seasons:['any'], regions:['all']},
+  {name:'Fern uncurling', icon:'🌿', types:['woods'], seasons:['spring'], regions:['all']},
+  {name:'Owl pellet or feather', icon:'🦉', types:['woods','countryside'], seasons:['any'], regions:['all']},
+  {name:'Butterfly', icon:'🦋', types:['woods','park','garden','countryside'], seasons:['spring','summer'], regions:['all']},
+  {name:'Fallen leaf collection (3 colours)', icon:'🍁', types:['woods','park'], seasons:['autumn'], regions:['all']},
+  {name:'Holly berries', icon:'🌱', types:['woods','park','garden'], seasons:['winter'], regions:['all']},
+  {name:'Tree stump you can count rings on', icon:'🪵', types:['woods'], seasons:['any'], regions:['all']},
+  {name:'Beetle', icon:'🪲', types:['woods','garden','park'], seasons:['spring','summer'], regions:['all']},
+  {name:'Wood pigeon', icon:'🕊️', types:['woods','park','town'], seasons:['any'], regions:['all']},
+  {name:'A tree taller than a house', icon:'🌲', types:['woods','park','mountain'], seasons:['any'], regions:['all']},
+
+  // ---------------- BEACH ----------------
+  {name:'Seashell', icon:'🐚', types:['beach'], seasons:['any'], regions:['all']},
+  {name:'Crab or crab shell', icon:'🦀', types:['beach'], seasons:['spring','summer','autumn'], regions:['all']},
+  {name:'Seaweed', icon:'🌊', types:['beach'], seasons:['any'], regions:['all']},
+  {name:'Seagull', icon:'🕊️', types:['beach','town'], seasons:['any'], regions:['all']},
+  {name:'Rock pool', icon:'🪨', types:['beach'], seasons:['any'], regions:['all']},
+  {name:'Piece of driftwood', icon:'🪵', types:['beach'], seasons:['any'], regions:['all']},
+  {name:'Sandcastle-worthy sand', icon:'🏖️', types:['beach'], seasons:['summer'], regions:['all']},
+  {name:'Starfish', icon:'⭐', types:['beach'], seasons:['any'], regions:['all']},
+  {name:'A boat out at sea', icon:'⛵', types:['beach'], seasons:['any'], regions:['all']},
+  {name:'Pebble with a stripe', icon:'🪨', types:['beach'], seasons:['any'], regions:['all']},
+  {name:'Jellyfish (washed up)', icon:'🪼', types:['beach'], seasons:['summer','autumn'], regions:['all']},
+  {name:'Sand dune grass', icon:'🌾', types:['beach'], seasons:['any'], regions:['all']},
+  {name:'Puffin or seabird colony', icon:'🐧', types:['beach','mountain'], seasons:['spring','summer'], regions:['north-wales','scotland']},
+  {name:'Cockle picker or fishing boat', icon:'🚤', types:['beach'], seasons:['any'], regions:['north-wales','south-wales']},
+  {name:'Sea glass', icon:'🟢', types:['beach'], seasons:['any'], regions:['all']},
+  {name:'Limpet on a rock', icon:'🐌', types:['beach'], seasons:['any'], regions:['all']},
+  {name:'Footprints in the sand', icon:'👣', types:['beach'], seasons:['any'], regions:['all']},
+  {name:'A lighthouse', icon:'🏛️', types:['beach'], seasons:['any'], regions:['all']},
+  {name:'Grey seal', icon:'🦭', types:['beach'], seasons:['autumn','winter'], regions:['north-wales','scotland','south-wales']},
+  {name:'Sandhopper under seaweed', icon:'🦐', types:['beach'], seasons:['summer'], regions:['all']},
+
+  // ---------------- PARK / GARDEN ----------------
+  {name:'Ladybird', icon:'🐞', types:['park','garden'], seasons:['spring','summer'], regions:['all']},
+  {name:'Daisy chain flower', icon:'🌼', types:['park','garden','countryside'], seasons:['spring','summer'], regions:['all']},
+  {name:'Bee on a flower', icon:'🐝', types:['park','garden','countryside'], seasons:['spring','summer'], regions:['all']},
+  {name:'Dog on a walk', icon:'🐕', types:['park','town','beach'], seasons:['any'], regions:['all']},
+  {name:'Bench to rest on', icon:'🪑', types:['park','town'], seasons:['any'], regions:['all']},
+  {name:'Dandelion clock', icon:'🌾', types:['park','garden','countryside'], seasons:['spring','summer'], regions:['all']},
+  {name:'Duck or duckling', icon:'🦆', types:['park','river'], seasons:['any'], regions:['all']},
+  {name:'Snail', icon:'🐌', types:['park','garden','woods'], seasons:['spring','summer','autumn'], regions:['all']},
+  {name:'Worm after the rain', icon:'🪱', types:['park','garden'], seasons:['autumn','winter','spring'], regions:['all']},
+  {name:'Kite or football in the air', icon:'🪁', types:['park'], seasons:['any'], regions:['all']},
+  {name:'Frost on the grass', icon:'❄️', types:['park','garden','countryside'], seasons:['winter'], regions:['all']},
+  {name:'Blossom on a tree', icon:'🌸', types:['park','garden'], seasons:['spring'], regions:['all']},
+  {name:'Hedgehog or hedgehog house', icon:'🦔', types:['garden','park'], seasons:['spring','summer','autumn'], regions:['all']},
+  {name:'Bird feeder', icon:'🐦', types:['garden','park'], seasons:['any'], regions:['all']},
+  {name:'Puddle to jump in', icon:'💦', types:['park','garden','countryside','town'], seasons:['autumn','winter'], regions:['all']},
+  {name:'Sunflower', icon:'🌻', types:['garden','countryside'], seasons:['summer'], regions:['all']},
+  {name:'Wasp nest (look, don\'t touch!)', icon:'🐝', types:['garden','park','woods'], seasons:['summer'], regions:['all']},
+  {name:'Frog or toad', icon:'🐸', types:['garden','park','river'], seasons:['spring','summer'], regions:['all']},
+
+  // ---------------- COUNTRYSIDE / FARMLAND ----------------
+  {name:'Sheep', icon:'🐑', types:['countryside','mountain'], seasons:['any'], regions:['all']},
+  {name:'Cow', icon:'🐄', types:['countryside'], seasons:['any'], regions:['all']},
+  {name:'Tractor', icon:'🚜', types:['countryside'], seasons:['any'], regions:['all']},
+  {name:'Hay bale', icon:'🌾', types:['countryside'], seasons:['summer','autumn'], regions:['all']},
+  {name:'Dry stone wall', icon:'🧱', types:['countryside','mountain'], seasons:['any'], regions:['north-england','north-wales','scotland']},
+  {name:'Scarecrow', icon:'👒', types:['countryside'], seasons:['summer','autumn'], regions:['all']},
+  {name:'Stile or farm gate', icon:'🚪', types:['countryside','mountain'], seasons:['any'], regions:['all']},
+  {name:'Lamb', icon:'🐑', types:['countryside'], seasons:['spring'], regions:['all']},
+  {name:'Horse in a field', icon:'🐴', types:['countryside'], seasons:['any'], regions:['all']},
+  {name:'Buzzard circling overhead', icon:'🦅', types:['countryside','mountain'], seasons:['any'], regions:['all']},
+  {name:'Field of a single crop colour', icon:'🌾', types:['countryside'], seasons:['summer'], regions:['all']},
+  {name:'Rabbit or rabbit hole', icon:'🐇', types:['countryside','park'], seasons:['any'], regions:['all']},
+  {name:'Farmhouse or barn', icon:'🏚️', types:['countryside'], seasons:['any'], regions:['all']},
+  {name:'Pheasant', icon:'🦃', types:['countryside','woods'], seasons:['autumn','winter'], regions:['all']},
+
+  // ---------------- RIVER / LAKE / CANAL ----------------
+  {name:'Duck family', icon:'🦆', types:['river'], seasons:['spring','summer'], regions:['all']},
+  {name:'Heron standing still', icon:'🐦', types:['river'], seasons:['any'], regions:['all']},
+  {name:'Stepping stones', icon:'🪨', types:['river'], seasons:['any'], regions:['all']},
+  {name:'Narrowboat or canal barge', icon:'🚢', types:['river'], seasons:['any'], regions:['north-england','south-england']},
+  {name:'Fish jumping or rippling water', icon:'🐟', types:['river'], seasons:['any'], regions:['all']},
+  {name:'Waterfall', icon:'💦', types:['river','mountain'], seasons:['any'], regions:['north-wales','scotland','north-england']},
+  {name:'Kingfisher flash of blue', icon:'🐦', types:['river'], seasons:['any'], regions:['all']},
+  {name:'Bridge over the water', icon:'🌉', types:['river'], seasons:['any'], regions:['all']},
+  {name:'Reeds or bulrushes', icon:'🌾', types:['river'], seasons:['any'], regions:['all']},
+  {name:'Dragonfly', icon:'🌈', types:['river'], seasons:['summer'], regions:['all']},
+  {name:'Otter tracks (or an otter!)', icon:'🦦', types:['river'], seasons:['any'], regions:['scotland','north-wales']},
+  {name:'Swan', icon:'🦢', types:['river'], seasons:['any'], regions:['all']},
+  {name:'Someone fishing', icon:'🎣', types:['river'], seasons:['any'], regions:['all']},
+  {name:'Skimming stone', icon:'🥌', types:['river','beach'], seasons:['any'], regions:['all']},
+
+  // ---------------- MOUNTAIN / HILL ----------------
+  {name:'Sheep on a hillside', icon:'🐑', types:['mountain'], seasons:['any'], regions:['all']},
+  {name:'A view over the valley', icon:'🏔️', types:['mountain'], seasons:['any'], regions:['all']},
+  {name:'Bracken turning golden', icon:'🍂', types:['mountain'], seasons:['autumn'], regions:['all']},
+  {name:'Cairn (pile of stones)', icon:'🪨', types:['mountain'], seasons:['any'], regions:['all']},
+  {name:'Cloud below you', icon:'☁️', types:['mountain'], seasons:['any'], regions:['north-wales','scotland']},
+  {name:'Wild pony', icon:'🐴', types:['mountain','countryside'], seasons:['any'], regions:['north-wales','south-wales']},
+  {name:'Mountain stream', icon:'💧', types:['mountain'], seasons:['any'], regions:['all']},
+  {name:'Heather in bloom', icon:'💜', types:['mountain'], seasons:['summer','autumn'], regions:['scotland','north-wales','north-england']},
+  {name:'Golden eagle or large bird of prey', icon:'🦅', types:['mountain'], seasons:['any'], regions:['scotland']},
+  {name:'Snow-capped peak', icon:'🏔️', types:['mountain'], seasons:['winter'], regions:['scotland','north-wales']},
+  {name:'Trig point', icon:'📍', types:['mountain'], seasons:['any'], regions:['all']},
+  {name:'Waymarker post', icon:'🪧', types:['mountain','countryside'], seasons:['any'], regions:['all']},
+
+  // ---------------- TOWN / URBAN ----------------
+  {name:'Street pigeon', icon:'🕊️', types:['town'], seasons:['any'], regions:['all']},
+  {name:'Postbox', icon:'📮', types:['town'], seasons:['any'], regions:['all']},
+  {name:'A dog in a jumper', icon:'🐕', types:['town'], seasons:['winter'], regions:['all']},
+  {name:'Mural or street art', icon:'🎨', types:['town'], seasons:['any'], regions:['all']},
+  {name:'Old building with a plaque', icon:'🏛️', types:['town'], seasons:['any'], regions:['all']},
+  {name:'Someone walking a bike', icon:'🚲', types:['town'], seasons:['any'], regions:['all']},
+  {name:'Bus stop', icon:'🚏', types:['town'], seasons:['any'], regions:['all']},
+  {name:'Fountain or water feature', icon:'⛲', types:['town'], seasons:['any'], regions:['all']},
+  {name:'A tree growing through pavement', icon:'🌳', types:['town'], seasons:['any'], regions:['all']},
+  {name:'Christmas lights', icon:'✨', types:['town'], seasons:['winter'], regions:['all']},
+  {name:'Clock tower', icon:'🕰️', types:['town'], seasons:['any'], regions:['all']},
+  {name:'Café with outdoor tables', icon:'☕', types:['town'], seasons:['spring','summer'], regions:['all']}
+];
+
+/* ---------------------------------------------------------------
+   STATE
+--------------------------------------------------------------- */
+let state = { type:'woods', season:'summer', region:'all' };
+let currentPool = [];
+let currentList = [];
+
+/* ---------------------------------------------------------------
+   BUILD CONTROLS
+--------------------------------------------------------------- */
+function buildChips(containerId, options, stateKey){
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  options.forEach(opt=>{
+    const chip = document.createElement('button');
+    chip.className = 'chip' + (state[stateKey]===opt.id ? ' active' : '');
+    chip.type = 'button';
+    chip.textContent = (opt.icon ? opt.icon+' ' : '') + opt.label;
+    chip.addEventListener('click', ()=>{
+      state[stateKey] = opt.id;
+      [...el.children].forEach(c=>c.classList.remove('active'));
+      chip.classList.add('active');
+      updatePoolNote();
+    });
+    el.appendChild(chip);
+  });
+}
+
+function buildRegionSelect(){
+  const sel = document.getElementById('regionSelect');
+  sel.innerHTML = '';
+  REGIONS.forEach(r=>{
+    const o = document.createElement('option');
+    o.value = r.id;
+    o.textContent = r.label;
+    if(r.id===state.region) o.selected = true;
+    sel.appendChild(o);
+  });
+  sel.addEventListener('change', ()=>{
+    state.region = sel.value;
+    updatePoolNote();
+  });
+}
+
+buildChips('typeChips', TYPES, 'type');
+buildChips('seasonChips', SEASONS, 'season');
+buildRegionSelect();
+
+/* ---------------------------------------------------------------
+   POOL / SELECTION LOGIC
+--------------------------------------------------------------- */
+function matches(item, {type, season, region}, relaxRegion, relaxSeason){
+  if(!item.types.includes(type)) return false;
+  const seasonOk = relaxSeason || item.seasons.includes('any') || item.seasons.includes(season);
+  const regionOk = relaxRegion || item.regions.includes('all') || item.regions.includes(region);
+  return seasonOk && regionOk;
+}
+
+function buildPool(){
+  let pool = ITEMS.filter(i=>matches(i, state, false, false));
+  let relaxedRegion=false, relaxedSeason=false;
+  if(pool.length < 10){
+    pool = ITEMS.filter(i=>matches(i, state, true, false));
+    relaxedRegion = true;
+  }
+  if(pool.length < 10){
+    pool = ITEMS.filter(i=>matches(i, state, true, true));
+    relaxedSeason = true;
+  }
+  return {pool, relaxedRegion, relaxedSeason};
+}
+
+function shuffle(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function updatePoolNote(){
+  const {pool, relaxedRegion, relaxedSeason} = buildPool();
+  let note = pool.length + ' possible sightings in the pool.';
+  if(relaxedSeason) note += ' (Broadened beyond one region and season to find enough items.)';
+  else if(relaxedRegion) note += ' (Broadened beyond your chosen region to find enough items.)';
+  document.getElementById('poolNote').textContent = note;
+}
+updatePoolNote();
+
+/* ---------------------------------------------------------------
+   RENDER SHEET
+--------------------------------------------------------------- */
+function typeLabel(id){ return TYPES.find(t=>t.id===id).label; }
+function seasonLabel(id){ return SEASONS.find(s=>s.id===id).label; }
+function regionLabel(id){ return REGIONS.find(r=>r.id===id).label; }
+
+function renderSheet(){
+  const sheet = document.getElementById('sheet');
+  const kids = document.getElementById('kidsName').value.trim();
+  const itemsHtml = currentList.map(it => `
+    <div class="item">
+      <div class="box"></div>
+      <div class="icon">${it.icon}</div>
+      <div class="item-name">${it.name}</div>
+    </div>
+  `).join('');
+
+  sheet.innerHTML = `
+    <div class="stamp">Wild<br>Walks<br>★ Verified ★<br>Spotter</div>
+    <div class="sheet-head">
+      <div class="eyebrow">Spotter Sheet</div>
+      <h2>${typeLabel(state.type)}</h2>
+      <div class="sub">${seasonLabel(state.season)} · ${regionLabel(state.region)}</div>
+    </div>
+    <div class="meta-line">
+      <span>Explorer(s): <span class="fill">${kids ? kids : '&nbsp;'}</span></span>
+      <span>Date: <span class="fill">&nbsp;</span></span>
+    </div>
+    <hr class="rule">
+    <div class="grid">
+      ${itemsHtml}
+    </div>
+    <div class="sheet-foot">
+      <div class="foot-note">Tick one box for every wild thing you find — ten ticks and you're a Wild Walks champion.</div>
+      <svg class="compass" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="46" fill="none" stroke="#43593c" stroke-width="3"/>
+        <path d="M50 10 L58 50 L50 90 L42 50 Z" fill="#a9612e"/>
+        <text x="50" y="8" text-anchor="middle" font-size="10" fill="#2e3f28" font-family="Courier Prime, monospace">N</text>
+      </svg>
+    </div>
+  `;
+}
+
+function generateList(){
+  const {pool} = buildPool();
+  if(pool.length === 0){
+    document.getElementById('sheet').innerHTML = '<div class="empty-state">No items match that combination yet — try a different region or season.</div>';
+    currentList = [];
+    return;
+  }
+  currentPool = pool;
+  const count = Math.min(10, pool.length);
+  currentList = shuffle(pool).slice(0, count);
+  renderSheet();
+}
+
+function reshuffleList(){
+  if(currentPool.length === 0){ generateList(); return; }
+  const count = Math.min(10, currentPool.length);
+  currentList = shuffle(currentPool).slice(0, count);
+  renderSheet();
+}
+
+document.getElementById('generateBtn').addEventListener('click', generateList);
+document.getElementById('shuffleBtn').addEventListener('click', reshuffleList);
+document.getElementById('printBtn').addEventListener('click', ()=>{
+  if(currentList.length === 0){ generateList(); }
+  setTimeout(()=>window.print(), 50);
+});
+document.getElementById('kidsName').addEventListener('input', ()=>{
+  if(currentList.length) renderSheet();
+});
+document.getElementById('bwToggle').addEventListener('change', (e)=>{
+  document.getElementById('sheet').classList.toggle('bw-preview', e.target.checked);
+});
+
+// Build an initial list on load
+generateList();
+</script>
+</body>
+</html>
